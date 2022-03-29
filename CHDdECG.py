@@ -1,4 +1,6 @@
-def ECGdCHD(num_classes):
+#CHDdECG
+
+def CHDdECG(num_classes):
     #signal
     input_signal = tf.keras.Input(shape=(5000,9),name='input_signal')
         

@@ -1,3 +1,5 @@
+#TemporalAttention block
+
 class TemporalAttention(layers.Layer):
     def __init__(self, feature_dim,kernel_size,stride,name='',**kwargs):
         super(TemporalAttention,self).__init__(name=name,**kwargs)

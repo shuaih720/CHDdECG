@@ -1,3 +1,5 @@
+#Resnet block
+
 class SE(layers.Layer):
     def __init__(self, filter_sq, input_channel,name=''):
         super(SE,self).__init__(name = name)

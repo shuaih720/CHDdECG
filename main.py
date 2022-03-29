@@ -1,3 +1,5 @@
+# train/test
+
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers,Sequential,Model
@@ -23,16 +25,15 @@ import h5py
 
 #model training
 with tf.device("/gpu:0"):    
-    loss1 = tf.keras.losses.BinaryCrossentropy(from_logits=True,label_smoothing=0.30,reduction=tf.keras.losses.Reduction.AUTO) 
+    loss1 = tf.keras.losses.BinaryCrossentropy(from_logits=True,label_smoothing=label_smoothing,reduction=tf.keras.losses.Reduction.AUTO) 
     model= CHDdECG(2)
     model.summary()
-    initial_learning_rate = 0.01
-    lr_schedule = tf.keras.optimizers.schedules.CosineDecay(initial_learning_rate, decay_steps=1000)
+    lr_schedule = tf.keras.optimizers.schedules.CosineDecay(initial_learning_rate=initial_learning_rate, decay_steps=1000)
     adam = Adam(learning_rate=lr_schedule)
     model.compile(optimizer=adam, loss=loss1, metrics=['accuracy',tf.keras.metrics.AUC(name='AUC',multi_label=True)])
 #     model.compile(optimizer=sgd, loss=loss1, metrics=['accuracy',tf.keras.metrics.AUC(name='AUC',multi_label=True)])
 #     model.compile(optimizer=adam, loss=[focal_loss(gamma=5,alpha=0.75)], metrics=['accuracy'])
-    history = model.fit([train_input_signal,train_input_clinical,train_input_wavelet],train_y, batch_size=256, epochs=10,
+    history = model.fit([train_input_signal,train_input_clinical,train_input_wavelet],train_y, batch_size=batch_size, epochs=epochs,
     validation_data=([test_input_signal,test_input_clinical,test_input_wavelet],test_y),verbose=1,shuffle=True,class_weight={0:0.20,1:1.})  
 
 #model test

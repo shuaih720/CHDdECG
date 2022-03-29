@@ -1,22 +1,7 @@
-#1.posi_encoding
-def channel_encoding(channel,d_model):
-    """
-    :param channel: channel position in original ECG data
-    :param d_model: inner_dim,related to num_units
-    :return: channel_encoding
-    """
-    def get_angles(channel,i):
-        return channel / np.power(10000., 2. * (i // 2.) / np.float(d_model))
-    angle_rates = get_angles(np.arange(channel)[:, np.newaxis],
-                             np.arange(d_model)[np.newaxis, :])
-    # operated by sin() in 2*i position, and by cos() in 2*i+1 position
-    channel_sin = np.sin(angle_rates[:,0::2])
-    channel_cos = np.cos(angle_rates[:,1::2])
-    channel_encoding = np.concatenate([channel_sin,channel_cos],axis=-1)
-    channel_encoding = tf.cast(channel_encoding[np.newaxis,...],tf.float32)
-    return channel_encoding
+#Transformer block
 
-#2.Multi-Head Attention
+'''Modified based on: https://tensorflow.google.cn/api_docs/python/tf/keras/optimizers/schedules/CosineDecay'''
+#1.Multi-Head Attention
 def scaled_dot_product_attention(q, k, v):
     '''attention(Q, K, V) = softmax(Q * K^T / sqrt(dk)) * V'''
     matmul_QK = tf.matmul(q,k,transpose_b=True)
@@ -58,7 +43,7 @@ class MultiHeadAttention(tf.keras.layers.Layer):
         output = self.dense(concat_attention)
         return output, attention_weights
     
-#3.Layer Normalization implementation
+#2.Layer Normalization implementation
 class LayerNormalization(tf.keras.layers.Layer):
 
     def __init__(self, epsilon=1e-8, **kwargs):
@@ -85,14 +70,14 @@ class LayerNormalization(tf.keras.layers.Layer):
     def compute_output_shape(self, input_shape):
         return input_shape
 
-#4. feedforward
+#3. feedforward
 def point_wise_feed_forward(d_model, diff):
     return tf.keras.Sequential([
         tf.keras.layers.Dense(diff, activation=tf.nn.relu),
         tf.keras.layers.Dense(d_model)
     ])
 
-#5. encoder
+#4. encoder
 class EncoderLayer(tf.keras.layers.Layer):
     def __init__(self, d_model, num_heads, dff, dropout_rate=0.1,name=''):
         super(EncoderLayer, self).__init__(name=name)

@@ -1,3 +1,6 @@
+#Tabnet block
+
+'''Modified based on: https://github.com/titu1994/tf-TabNet/blob/master/tabnet'''
 #1.TransformBlock implementation
 class TransformBlock(tf.keras.layers.Layer):
 
