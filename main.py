@@ -34,7 +34,7 @@ with tf.device("/gpu:0"):
 #     model.compile(optimizer=sgd, loss=loss1, metrics=['accuracy',tf.keras.metrics.AUC(name='AUC',multi_label=True)])
 #     model.compile(optimizer=adam, loss=[focal_loss(gamma=5,alpha=0.75)], metrics=['accuracy'])
     history = model.fit([train_input_signal,train_input_clinical,train_input_wavelet],train_y, batch_size=batch_size, epochs=epochs,
-    validation_data=([test_input_signal,test_input_clinical,test_input_wavelet],test_y),verbose=1,shuffle=True,class_weight={0:0.20,1:1.})  
+    validation_data=([val_input_signal,val_input_clinical,val_input_wavelet],val_y),verbose=1,shuffle=True,class_weight={0:0.20,1:1.})  
 
 #model test
 y_score = model.predict([test_input_signal,test_input_clinical,test_input_wavelet])
