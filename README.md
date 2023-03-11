@@ -1,7 +1,8 @@
 # CHDdECG
-Scripts and modules for training and testing deep neural networks for  automatic classification of pediatric Congenital Heart Diseases(CHDs) using Electrocardiogram(ECG).
-Companion code to the paper "Automatic Diagnosis of Congenital Heart Diseases from 9-Lead Pediatric Electrocardiogram Using Deep Neural Networks".
-https://www.xxxxxxxxx.com/
+Scripts and modules for training and testing deep neural networks that conducts congenital heart disease detection using electrocardiogram (ECG).
+Companion code to the paper "Congenital Heart Disease Detection by Pediatric Electrocardiogram Based Deep Learning Integrated with Human Concepts".
+
+<!-- https://www.xxxxxxxxx.com/
 
 --------------------
 
@@ -24,30 +25,10 @@ Bibtex:
   number = {}
 }
 ```
---------------------
+-------------------- -->
 
 ## Abstract information
-  Early detection and timely intervention are prerequisites for improved treatment outcomes of pediatric patients with congenital
-heart diseases (CHDs). Nowadays, transthoracic echocardiogram (TTE) is considered the standard of care for CHD detection
-in developed countries. However, a large number of CHD patients still do not have access to timely detection techniques,
-especially in low-resource countries and regions. Since electrocardiogram (ECG) is a commonly-used tool worldwide and
-previous studies have found correlations between ECG manifestations and CHDs, it is highly desirable to devise an effective
-ECG-based differential diagnosis approach for CHD. To achieve this and to facilitate timely CHD detection and intervention, we
-developed a new deep learning based approach, Congenital Heart Disease diagnosis via Electrocardiogram (CHDdECG),
-which provided differential diagnosis for pediatric CHDs and their subtypes using routinely acquired ECG examination. In
-particular, CHDdECG automatically extracted clinically useful features from raw ECG signals that might not be recognized by
-human experts. During processing, these extracted features were integrated with expert knowledge as well as features obtained
-from wavelet transformation in order to provide a robust, scalable, and accurate analysis. In total, 9-lead ECG-waveform
-data collected from 85,006 pediatric patients presenting to two major referral centers were analyzed to train and validate the
-CHDdECG model that identified the status as CHD, including its various subtypes. On the test set and the out-of-distribution
-external test set, CHDdECG achieved good performances, with overall ROC-AUC scores around 0.91 and median confidences
-over 0.80. We also found that features automatically extracted from ECG-waveform data by CHDdECG were critical, which
-contributed to higher CHD detection sensitivity compared to cardiologists. We further employed the Grad-CAM approach to
-identify specific ECG manifestations associated with CHD subtypes, and obtained results consistent with previous observations
-on adult ECG data. Our study demonstrated that the deep learning based CHDdECG approach could be used as an assistive
-tool in conjunction with or in lieu of comprehensive diagnostic work-ups for pediatric CHD screening and early detection. The
-impact of this study is directly on pediatric CHD diagnosis with ECG data, yet the benefits of exploring the potentials of ECG
-data are of general significance.
+Early detection is critical to achieving improved treatment outcomes for child patients with congenital heart diseases (CHDs). Therefore, developing effective CHD detection techniques using low-cost and non-invasive pediatric electrocardiogram are highly desirable. We propose a deep learning approach for CHD detection, CHDdECG, which automatically extracts features from pediatric electrocardiogram signals and wavelet transformation characteristics, integrating them with expert knowledge. Trained with 65,869 cases, CHDdECG achieved ROC-AUC of 0.915 and 0.917 on real-world and external test sets containing 12,000 and 7,137 cases, respectively. Overall specificities were 0.881 and 0.937, respectively, with major CHD subtype specificities above 0.91. Notably, CHDdECG outperformed electrocardiogram cardiologists in comparison, and the automatically extracted features from electrocardiogram were about 8 times more significant than expert knowledge, implying that CHDdECG find some knowledge beyond human cognition. Our study directly impacts CHD detection with pediatric electrocardiogram and highlights the potential of pediatric electrocardiogram for broader benefits.
 
 --------------------
 ## Requirements
