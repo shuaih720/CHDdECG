@@ -66,6 +66,7 @@ python
 ```python
 python
 >>> cd CHDdECG
+>>> python import.py
 >>> python layers_Tabnet.py
 >>> python layers_Resblock.py
 >>> python layers_TemporalAttention.py
