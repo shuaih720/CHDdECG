@@ -35,6 +35,15 @@ Early detection is critical to achieving improved treatment outcomes for child p
 
 This code was tested on Python 3 with Tensorflow `2.6.0`
 
+In addition, the packages we are calling now is as follows:
+- [x] tensorflow
+- [x] sklearn
+- [x] random
+- [x] scipy
+- [x] pandas
+- [x] numpy
+- [x] tabnet
+
 ## Framework illustration
 
 - **input**: `shape = (N, 5000, 9)`. The input tensor, a signal of 10 seconds should contain the 5000 points of the ECG tracings sampled at 500Hz both in the training and in the test set. The last dimension of the tensor contains points of the 9 different leads. The leads are ordered in the following order: `{I, II, III, AVR, AVL, AVF, V1, V3, V5}`. All signal are preprocessed with noise removal techniques before feeding it to the neural network model. 
@@ -43,3 +52,10 @@ This code was tested on Python 3 with Tensorflow `2.6.0`
 ![example1](https://github.com/shuaih720/CHDdECG/blob/main/Figures/An%20illustration%20of%20the%20deep%20learning%20based%20model.png)
 - **train and test**: ``main.py``:Script for training the neural network and generating the neural network predictions on a given dataset.
 - **output**: `shape = (N, 2)`. Each entry contains a probability between 0 and 1, and can be understood as the probability of a given abnormality to be present.
+- **Install from Github**
+```python
+python
+>>> from yyc import pipeline
+>>> from yyc import scheme
+>>> pipeline.encode(method=scheme.YYC(support_bases="A", base_reference=[0, 1, 0, 1], current_code_matrix=[[1, 1, 0, 0], [1, 0, 0, 1], [1, 1, 0, 0], [1, 1, 0, 0]], search_count=100, max_homopolymer=4, max_content=0.6), input_path="./files/Mona Lisa.jpg", output_path="./output/mona_lisa.dna", model_path="./output/yyc.pkl", need_index=True, need_log=True)
+```
