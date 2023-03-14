@@ -56,7 +56,7 @@ In addition, the packages we are calling now is as follows:
 ## Install from Github
 ```python
 python
->>> git clone github.com/shuaih720/CHDdECG
+>>> git clone https://github.com/shuaih720/CHDdECG
 >>> cd CHDdECG
 >>> python setup.py install
 ```
