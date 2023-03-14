@@ -62,6 +62,18 @@ python
 ```
 (Typical install time on a "normal" desktop computer: very variable)
 
+## instructions for use
+```python
+python
+>>> cd CHDdECG
+>>> python layers_Tabnet.py
+>>> python layers_Resblock.py
+>>> python layers_TemporalAttention.py
+>>> python layers_Transformer.py
+>>> python CHDdECG.py
+>>> python main.py
+```
+Training and test the neural network and generating the neural network predictions on given datasets.
 ## License
 
 This project is covered under the Apache 2.0 License.
