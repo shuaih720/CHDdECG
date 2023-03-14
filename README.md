@@ -55,7 +55,7 @@ In addition, the packages we are calling now is as follows:
 - **Install from Github**
 ```python
 python
->>> from yyc import pipeline
->>> from yyc import scheme
+>>> pip install CHDdECG
+>>> from CHDdECG import
 >>> pipeline.encode(method=scheme.YYC(support_bases="A", base_reference=[0, 1, 0, 1], current_code_matrix=[[1, 1, 0, 0], [1, 0, 0, 1], [1, 1, 0, 0], [1, 1, 0, 0]], search_count=100, max_homopolymer=4, max_content=0.6), input_path="./files/Mona Lisa.jpg", output_path="./output/mona_lisa.dna", model_path="./output/yyc.pkl", need_index=True, need_log=True)
 ```
