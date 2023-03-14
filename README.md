@@ -36,7 +36,7 @@ Early detection is critical to achieving improved treatment outcomes for child p
 This code was tested on Python 3 with Tensorflow `2.6.0`
 
 In addition, the packages we are calling now is as follows:
-- [x] tensorflow
+- [x] tensorflow2.0
 - [x] sklearn
 - [x] random
 - [x] scipy
@@ -52,13 +52,15 @@ In addition, the packages we are calling now is as follows:
 ![example1](https://github.com/shuaih720/CHDdECG/blob/main/Figures/An%20illustration%20of%20the%20deep%20learning%20based%20model.png)
 - **train and test**: ``main.py``:Script for training the neural network and generating the neural network predictions on a given dataset.
 - **output**: `shape = (N, 2)`. Each entry contains a probability between 0 and 1, and can be understood as the probability of a given abnormality to be present.
-- **Install from Github**
+
+## Install from Github
 ```python
 python
 >>> pip install CHDdECG
 >>> from CHDdECG import
 >>> pipeline.encode(method=scheme.YYC(support_bases="A", base_reference=[0, 1, 0, 1], current_code_matrix=[[1, 1, 0, 0], [1, 0, 0, 1], [1, 1, 0, 0], [1, 1, 0, 0]], search_count=100, max_homopolymer=4, max_content=0.6), input_path="./files/Mona Lisa.jpg", output_path="./output/mona_lisa.dna", model_path="./output/yyc.pkl", need_index=True, need_log=True)
 ```
+(Typical install time on a "normal" desktop computer: very variable)
 
 ## License
 
