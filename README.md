@@ -62,7 +62,7 @@ python
 ```
 (Typical install time on a "normal" desktop computer: very variable)
 
-## instructions for use
+## Instructions for use
 ```python
 python
 >>> cd CHDdECG
