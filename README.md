@@ -74,7 +74,7 @@ python
 >>> python CHDdECG.py
 >>> python main.py
 ```
-Training and test the neural network and generating the neural network predictions on given datasets.
+Training the neural network and generating the neural network predictions on given datasets.
 ## License
 
 This project is covered under the Apache 2.0 License.
