@@ -74,6 +74,12 @@ python
 >>> python CHDdECG.py
 >>> python main.py
 ```
+OR running the integrated version 
+```python
+python
+>>> cd CHDdECG
+>>> python Merged_CHD.py
+```
 Training the neural network and generating the neural network predictions on given datasets.
 ## License
 
