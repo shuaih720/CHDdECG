@@ -23,7 +23,7 @@ val_y = np.load('./val_label_demo.npy')
 
 label_smoothing=0.3
 initial_learning_rate =0.01
-batch_size=128
+batch_size=256
 epochs=20
 
 
