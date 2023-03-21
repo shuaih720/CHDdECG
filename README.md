@@ -36,13 +36,14 @@ Early detection is critical to achieving improved treatment outcomes for child p
 This code was tested on Python 3 with Tensorflow `2.6.0`
 
 In addition, the packages we are calling now is as follows:
-- [x] tensorflow2.0
+- [x] tensorflow2.0     
 - [x] sklearn
 - [x] random
 - [x] scipy
 - [x] pandas
 - [x] numpy
 - [x] tabnet
+- [x] tensorflow_addons  
 
 ## Framework illustration
 
