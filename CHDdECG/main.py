@@ -39,7 +39,7 @@ def step_decay(epoch):
 	lrate = initial_lrate * math.pow(drop, math.floor((1+epoch)/epochs_drop))
 	return lrate
     
-adam = Adam(learning_rate=0.0)
+adam = Adam()
 model.compile(optimizer=adam, loss=loss1, metrics=['accuracy',tf.keras.metrics.AUC(name='AUC',multi_label=True)])
 lrate = LearningRateScheduler(step_decay)
 callbacks_list = [lrate]
