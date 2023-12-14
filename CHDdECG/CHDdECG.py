@@ -5,6 +5,7 @@ import tensorflow as tf
 from layers_Transformer import EncoderLayer
 from layers_TemporalAttention import TemporalAttention
 from layers_Tabnet import TabNet
+from layers_Downsampling import TabNet_downsampling
 #define 形式定义model
 # def ECGnet(num_classes,input_signal,input_clinical,input_wavelet):
 def ECGnet(num_classes):
