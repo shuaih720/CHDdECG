@@ -507,52 +507,199 @@ class TemporalAttention(layers.Layer):
         att = self.sigmoid(att)
         y = att * x
         return y
+#Sampling
+class TabNet_downsampling(tf.keras.layers.Layer):
+    
+    def __init__(self, num_features,
+                 feature_dim=64,
+                 output_dim=64,
+                 num_decision_steps=5,
+                 relaxation_factor=1.5,
+                 sparsity_coefficient=1e-5,
+                 norm_type='batch',#group
+                 batch_momentum=0.98,
+                 virtual_batch_size=None,
+                 num_groups=2,
+                 epsilon=1e-5,
+                 **kwargs):
+        
+        super(TabNet_downsampling, self).__init__(**kwargs)
 
+        if feature_dim <= output_dim:
+            raise ValueError("To compute `features_for_coef`, feature_dim must be larger than output dim")
+
+        feature_dim = int(feature_dim)
+        output_dim = int(output_dim)
+        num_decision_steps = int(num_decision_steps)
+        relaxation_factor = float(relaxation_factor)
+        sparsity_coefficient = float(sparsity_coefficient)
+        batch_momentum = float(batch_momentum)
+        num_groups = max(1, int(num_groups))
+        epsilon = float(epsilon)
+
+        if relaxation_factor < 0.:
+            raise ValueError("`relaxation_factor` cannot be negative !")
+
+        if sparsity_coefficient < 0.:
+            raise ValueError("`sparsity_coefficient` cannot be negative !")
+
+        if virtual_batch_size is not None:
+            virtual_batch_size = int(virtual_batch_size)
+
+        if norm_type not in ['batch', 'group']:
+            raise ValueError("`norm_type` must be either `batch` or `group`")
+
+        self.feature_columns = feature_columns=None
+        self.num_features = num_features
+        self.feature_dim = feature_dim
+        self.output_dim = output_dim     
+        self.num_decision_steps = num_decision_steps
+        self.relaxation_factor = relaxation_factor
+        self.sparsity_coefficient = sparsity_coefficient
+        self.norm_type = norm_type
+        self.batch_momentum = batch_momentum
+        self.virtual_batch_size = virtual_batch_size
+        self.num_groups = num_groups
+        self.epsilon = epsilon
+
+        if num_decision_steps > 1:
+            features_for_coeff = feature_dim - output_dim
+            print(f"[TabNet_lowdim]: {features_for_coeff} features will be used for decision steps.")
+
+        if self.feature_columns is not None:
+            self.input_features = tf.keras.layers.DenseFeatures(feature_columns, trainable=True)
+
+            if self.norm_type == 'batch':
+                self.input_bn = tf.keras.layers.BatchNormalization(axis=-1, momentum=batch_momentum, name='input_bn')
+            else:
+                self.input_bn = GroupNormalization(axis=-1, groups=self.num_groups, name='input_gn')
+
+        else:
+            self.input_features = None
+            self.input_bn = None
+
+        self.transform_f1 = TransformBlock(2 * self.feature_dim, self.norm_type,
+                                           self.batch_momentum, self.virtual_batch_size, self.num_groups,
+                                           block_name='f1')
+
+        self.transform_f2 = TransformBlock(2 * self.feature_dim, self.norm_type,
+                                           self.batch_momentum, self.virtual_batch_size, self.num_groups,
+                                           block_name='f2')
+
+        self.transform_f3_list = [
+            TransformBlock(2 * self.feature_dim, self.norm_type,
+                           self.batch_momentum, self.virtual_batch_size, self.num_groups, block_name=f'f3_{i}')
+        ]
+
+        self.transform_f4_list = [
+            TransformBlock(2 * self.feature_dim, self.norm_type,
+                           self.batch_momentum, self.virtual_batch_size, self.num_groups, block_name=f'f4_{i}')
+        ]
+        
+        self.transform_coef_list = [
+            TransformBlock(self.num_features, self.norm_type,
+                           self.batch_momentum, self.virtual_batch_size, self.num_groups, block_name=f'coef_{i}')
+        ]
+        
+        self._step_feature_selection_masks = None
+        self._step_aggregate_feature_selection_mask = None
+
+    def call(self, inputs, training=None):
+        if self.input_features is not None:
+            features = self.input_features(inputs)
+            features = self.input_bn(features, training=training)
+            
+        else:
+            features = inputs
+
+        batch_size = tf.shape(features)[0]
+        self._step_feature_selection_masks = []
+        self._step_aggregate_feature_selection_mask = None
+
+        # Initializes decision-step dependent variables.
+        output_aggregated = tf.zeros([batch_size, self.output_dim])
+        masked_features = features
+        mask_values = tf.zeros([batch_size, self.num_features])
+        aggregated_mask_values = tf.zeros([batch_size, self.num_features])
+        complementary_aggregated_mask_values = tf.ones(
+            [batch_size, self.num_features])
+
+        total_entropy = 0.0
+        entropy_loss = 0.
+        if (self.num_decision_steps == 0):
+            transform_f1 = self.transform_f1(masked_features, training=training)
+            transform_f1 = glu(transform_f1, self.feature_dim)
+
+            transform_f2 = self.transform_f2(transform_f1, training=training)
+            transform_f2 = (glu(transform_f2, self.feature_dim) +
+                            transform_f1) * tf.math.sqrt(0.5)
+
+            transform_f3 = self.transform_f3_list[0](transform_f2, training=training)
+            transform_f3 = (glu(transform_f3, self.feature_dim) +
+                            transform_f2) * tf.math.sqrt(0.5)
+
+            transform_f4 = self.transform_f4_list[0](transform_f3, training=training)
+            transform_f4 = (glu(transform_f4, self.feature_dim) +
+                            transform_f3) * tf.math.sqrt(0.5)
+            
+            decision_out = tf.nn.relu(transform_f4[:, :self.output_dim])
+            output_aggregated += decision_out
+            scale_agg = tf.reduce_sum(decision_out, axis=1, keepdims=True)
+            aggregated_mask_values += mask_values * scale_agg
+                
+            features_for_coef = transform_f4[:, self.output_dim:]
+
+        agg_mask = tf.expand_dims(tf.expand_dims(aggregated_mask_values, 0), 3)
+        self._step_aggregate_feature_selection_mask = agg_mask
+        return output_aggregated,mask_values
 #CHDdECG
-def CHDdECG(num_classes):
+def ECGnet(num_classes):
     #signal
     input_signal = tf.keras.Input(shape=(5000,9),name='input_signal')
         
-    Signal_block_conv = InputConv(filter_num=32,kernel_size=50,stride=2,name='signal_block_conv')(input_signal)
+    Signal_block_conv = InputConv(filter_num=32,kernel_size=30,stride=2,name='signal_block_conv')(input_signal)
     
 #     Signal_block_res1 = ResBlock(filter_num=32,kernel_size=15,stride=2,name='signal_block_res1')(Signal_block_conv)
         
-    Signal_block_res2_1 = ResBlock(filter_num=32,kernel_size=3,stride=2,name='signal_block_res2_1')(Signal_block_conv)
-    Signal_block_res3_1 = ResBlock(filter_num=32,kernel_size=3,stride=2,name='signal_block_res3_1')(Signal_block_res2_1)
-#     Signal_block_res4_1 = ResBlock(filter_num=32,kernel_size=3,stride=2,name='signal_block_res4_1')(Signal_block_res3_1)
+    Signal_block_res2_1 = ResBlock(filter_num=16,kernel_size=3,stride=2,name='signal_block_res2_1')(Signal_block_conv)
+    Signal_block_res3_1 = ResBlock(filter_num=16,kernel_size=3,stride=2,name='signal_block_res3_1')(Signal_block_res2_1)
+    Signal_block_res4_1 = ResBlock(filter_num=16,kernel_size=3,stride=2,name='signal_block_res4_1')(Signal_block_res3_1)
         
-    Signal_block_res2_2 = ResBlock(filter_num=32,kernel_size=5,stride=2,name='signal_block_res2_2')(Signal_block_conv)
-    Signal_block_res3_2 = ResBlock(filter_num=32,kernel_size=5,stride=2,name='signal_block_res3_2')(Signal_block_res2_2)
-#     Signal_block_res4_2 = ResBlock(filter_num=32,kernel_size=5,stride=2,name='signal_block_res4_2')(Signal_block_res3_2)
+    Signal_block_res2_2 = ResBlock(filter_num=16,kernel_size=5,stride=2,name='signal_block_res2_2')(Signal_block_conv)
+    Signal_block_res3_2 = ResBlock(filter_num=16,kernel_size=5,stride=2,name='signal_block_res3_2')(Signal_block_res2_2)
+    Signal_block_res4_2 = ResBlock(filter_num=16,kernel_size=5,stride=2,name='signal_block_res4_2')(Signal_block_res3_2)
         
-    Signal_block_res2_3 = ResBlock(filter_num=32,kernel_size=7,stride=2,name='signal_block_res2_3')(Signal_block_conv)
-    Signal_block_res3_3 = ResBlock(filter_num=32,kernel_size=7,stride=2,name='signal_block_res3_3')(Signal_block_res2_3)
-#     Signal_block_res4_3 = ResBlock(filter_num=32,kernel_size=7,stride=2,name='signal_block_res4_3')(Signal_block_res3_3)
+    Signal_block_res2_3 = ResBlock(filter_num=16,kernel_size=7,stride=2,name='signal_block_res2_3')(Signal_block_conv)
+    Signal_block_res3_3 = ResBlock(filter_num=16,kernel_size=7,stride=2,name='signal_block_res3_3')(Signal_block_res2_3)
+    Signal_block_res4_3 = ResBlock(filter_num=16,kernel_size=7,stride=2,name='signal_block_res4_3')(Signal_block_res3_3)
     
-    model_con = tf.keras.layers.Concatenate(axis = -1,name = 'conv_concat')([Signal_block_res3_1,Signal_block_res3_2,Signal_block_res3_3])
+    model_con = tf.keras.layers.Concatenate(axis = -1,name = 'conv_concat')([Signal_block_res4_1,Signal_block_res4_2,Signal_block_res4_3])
     
-    Signal_block_trans = EncoderLayer(d_model=96,num_heads=8, dff=128, dropout_rate=0.2,name='signal_block_trans')(model_con)
+    Signal_block_trans = EncoderLayer(d_model=48,num_heads=8, dff=128, dropout_rate=0.2,name='signal_block_trans')(model_con)
     
-    Signal_temporal_attention = TemporalAttention(feature_dim=96,kernel_size=3,stride=1,name = 'signal_tem_atten')(Signal_block_trans)
+    Signal_temporal_attention = TemporalAttention(feature_dim=48,kernel_size=3,stride=1,name = 'signal_tem_atten')(Signal_block_trans)
     
     fla = tf.keras.layers.Flatten(name='signal_fla')(Signal_temporal_attention)
     
-    Signal_block_tab1 = TabNet(num_features=960,feature_dim=256,output_dim=128,num_decision_steps=1,relaxation_factor=3,norm_type='group',
+    Signal_block_tab1 = TabNet_downsampling(num_features=960,feature_dim=256,output_dim=128,num_decision_steps=0,relaxation_factor=3,norm_type='batch',
     batch_momentum=0.95,virtual_batch_size=None,num_groups=2,epsilon=1e-5,name='signal_block_tab')(fla)[0]#num_features=960
     
     input_clinical = tf.keras.Input(shape=114,name='input_clinical')
     
-    Clinical_block_tab1 = TabNet(num_features=114,feature_dim=128,output_dim=64,num_decision_steps=2,relaxation_factor=3,norm_type='group',
+    Clinical_block_tab1 = TabNet(num_features=114,feature_dim=256,output_dim=64,num_decision_steps=2,relaxation_factor=3,norm_type='batch',
     batch_momentum=0.95,virtual_batch_size=None,num_groups=2,epsilon=1e-5,name='clinical_block_tab')(input_clinical)[0]
     
     input_wavelet = tf.keras.Input(shape=54,name='input_wavelet')
     
-    Wavelet_block_tab1 = TabNet(num_features=54,feature_dim=64,output_dim=32,num_decision_steps=2,relaxation_factor=3,norm_type='group',
+    Wavelet_block_tab1 = TabNet(num_features=54,feature_dim=256,output_dim=32,num_decision_steps=2,relaxation_factor=3,norm_type='batch',
     batch_momentum=0.95,virtual_batch_size=None,num_groups=2,epsilon=1e-5,name='wavelet_block_tab')(input_wavelet)[0]
     
     fusion_block = tf.keras.layers.Concatenate(axis = -1,name = 'fusion_concat')([Signal_block_tab1,Clinical_block_tab1,Wavelet_block_tab1])
-       
-    fusion_block_1 = tf.keras.layers.Dense(128 , activation='relu',name='fusion_dense1')(fusion_block)
+    
+    tab1_all = TabNet(num_features=224,feature_dim=512,output_dim=256,num_decision_steps=2,relaxation_factor=3,norm_type='batch',
+    batch_momentum=0.95,virtual_batch_size=None,num_groups=2,epsilon=1e-5,name='tab_con')(fusion_block)[0]
+    
+    fusion_block_1 = tf.keras.layers.Dense(64 , activation='relu',name='fusion_dense1')(tab1_all)
     fusion_block_2 = tf.keras.layers.Dropout(rate = 0.2,name='fusion_dropout1')(fusion_block_1)
     fusion_block_3 = tf.keras.layers.Dense(num_classes, activation='softmax',name='fusion_dense2')(fusion_block_2)
     
