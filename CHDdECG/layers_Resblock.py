@@ -7,12 +7,18 @@ class InputConv(tf.keras.layers.Layer):
         super(InputConv,self).__init__(name=name,**kwargs)
         self.conv1 = tf.keras.layers.Conv1D(filters=filter_num,kernel_size=kernel_size,strides=stride)
         self.bn1 = tf.keras.layers.BatchNormalization(axis=-1)
-        self.relu = tf.keras.layers.Activation('relu')
+        self.relu1 = tf.keras.layers.Activation('relu')
+        self.conv2 = tf.keras.layers.Conv1D(filters=filter_num,kernel_size=15,strides=2)
+        self.bn2 = tf.keras.layers.BatchNormalization(axis=-1)
+        self.relu2 = tf.keras.layers.Activation('relu')
 
     def call(self,input):
         model1 = self.conv1(input)
         model1 = self.bn1(model1)
-        model1 = self.relu(model1)
+        model1 = self.relu1(model1)
+        model1 = self.conv2(model1)
+        model1 = self.bn2(model1)
+        model1 = self.relu2(model1)
         
         return model1
 
