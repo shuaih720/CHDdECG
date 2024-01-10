@@ -594,17 +594,17 @@ class TabNet_downsampling(tf.keras.layers.Layer):
 
         self.transform_f3_list = [
             TransformBlock(2 * self.feature_dim, self.norm_type,
-                           self.batch_momentum, self.virtual_batch_size, self.num_groups, block_name=f'f3_{i}')
+                           self.batch_momentum, self.virtual_batch_size, self.num_groups, block_name=f'f3_')
         ]
 
         self.transform_f4_list = [
             TransformBlock(2 * self.feature_dim, self.norm_type,
-                           self.batch_momentum, self.virtual_batch_size, self.num_groups, block_name=f'f4_{i}')
+                           self.batch_momentum, self.virtual_batch_size, self.num_groups, block_name=f'f4_')
         ]
         
         self.transform_coef_list = [
             TransformBlock(self.num_features, self.norm_type,
-                           self.batch_momentum, self.virtual_batch_size, self.num_groups, block_name=f'coef_{i}')
+                           self.batch_momentum, self.virtual_batch_size, self.num_groups, block_name=f'coef_')
         ]
         
         self._step_feature_selection_masks = None
