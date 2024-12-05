@@ -48,7 +48,10 @@ In addition, the packages we are calling now is as follows:
 
 ## Framework illustration
 
-- **input**: `shape = (N, 680, 680, 3)`. The size of input tensor.
+- **input**: `shape = (N, 5000, 9)`. The input tensor, a signal of 10 seconds should contain the 5000 points of the ECG tracings sampled at 500Hz both in the training and in the test set. The last dimension of the tensor contains points of the 9 different leads. The leads are ordered in the following order: `{I, II, III, AVR, AVL, AVF, V1, V3, V5}`. All signal are preprocessed with noise removal techniques before feeding it to the neural network model. 
+![example](https://github.com/shuaih720/CHDdECG/blob/main/Figures/ECG%20example.png)
+- **framework illustration**: ``CHDdECG.py``: Auxiliary module that defines the architecture of the deep neural network. The internal module structure is in the following files：``layers_Resblock.py``,``layers_TemporalAttention.py``,``layers_Transformer.py``,``layers_Tabnet.py``.
+![example1](https://github.com/shuaih720/CHDdECG/blob/main/Figures/An%20illustration%20of%20the%20deep%20learning%20based%20model.png)
 - **train and test**: ``main.py``:Script for training the neural network and generating the neural network predictions on a given dataset.
 - **output**: `shape = (N, 2)`. Each entry contains a probability between 0 and 1, and can be understood as the probability of a given abnormality to be present.
 
